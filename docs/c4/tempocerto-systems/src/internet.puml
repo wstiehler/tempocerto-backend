@@ -1,0 +1,29 @@
+@startuml
+
+!define TEMPOCERTO_API_CONTAINER_TEMPOCERTO tempocerto-api-container
+!define TRAEFIK_CONTAINER_TEMPOCERTO traefik-container
+!define DATABASE_CONTAINER_TEMPOCERTO database-container
+
+!define TEMPOCERTO_API_URL http://tempocerto-api.localhost.com
+!define DATABASE_URL http://database.localhost.com:3306
+
+skinparam monochrome true
+
+package "Docker Containers" {
+    node "tempocerto-api" as tempocerto_api_container {
+        [TempoCerto API]
+    }
+    node "Traefik" as traefik_container {
+        [Traefik]
+    }
+    node "Database" as database_container {
+    }
+}
+
+tempocerto_api_container .. traefik_container
+
+traefik_container ..> tempocerto_api_container : TEMPOCERTO_API_URL
+
+tempocerto_api_container .. database_container : DATABASE_URL
+
+@enduml

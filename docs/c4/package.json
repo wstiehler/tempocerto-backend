@@ -6,10 +6,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "new": "c4builder new",
-    "config": "cd zpe-systems && c4builder config",
-    "site": "cd zpe-systems && c4builder site",
-    "watch": "cd zpe-systems && c4builder site --watch",
-    "build": "cd zpe-systems && c4builder site=false"
+    "config": "cd tempocerto-systems && c4builder config",
+    "site": "cd tempocerto-systems && c4builder site",
+    "watch": "cd tempocerto-systems && c4builder site --watch",
+    "build": "cd tempocerto-systems && c4builder site=false"
   },
   "author": "",
   "license": "ISC",

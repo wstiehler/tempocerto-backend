@@ -1,0 +1,32 @@
+@startuml
+!theme plain
+
+actor User
+participant "Gin Handler" as GinHandler
+participant "Service" as Service
+participant "MySQL Database" as Database
+
+User -> GinHandler: Send request to create weekly available slots
+GinHandler -> GinHandler: Parse request payload
+GinHandler -> GinHandler: Validate input parameters
+GinHandler -> Service: Process request
+Service -> Service: Check if slot time is outside work hours
+alt Slot time is outside work hours
+    Service --> GinHandler: Return error response
+else Slot time is within work hours
+    Service -> Service: Iterate over each day in the specified date range
+    Service -> Service: Iterate over each weekday in the provided weekdays
+    Service -> Service: Iterate over each time slot within work hours
+    Service -> Database: Create available slot in MySQL database
+    alt Slot creation successful
+        Database --> Service: Return created slot
+        Service --> GinHandler: Add slot to response
+    else Slot creation failed
+        Database --> Service: Return error
+        Service --> GinHandler: Log error message
+        Service --> GinHandler: Return error response
+    end
+end
+GinHandler -> User: Return response
+
+@enduml

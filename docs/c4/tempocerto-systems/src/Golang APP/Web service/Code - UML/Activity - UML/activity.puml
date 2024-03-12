@@ -1,0 +1,36 @@
+@startuml
+!theme plain
+
+start
+:[gin-handler] Receives requests to create weekly available slots;
+:Parse the request payload;
+:Validate the input parameters;
+:Processes the request;
+
+if (Slot time is outside work hours?) then (yes)
+    :Return error response to user;
+    :Abort operation;
+    stop
+else (no)
+    :Iterate over each day in the specified date range;
+    :Iterate over each weekday in the provided weekdays;
+    :Iterate over each time slot within work hours;
+    if (Slot creation successful?) then (yes)
+        :Add slot to response;
+    else (no)
+        :Log error message;
+        :Return error response to user;
+        :Abort operation;
+        stop
+    endif
+endif
+
+if (All slots created successfully?) then (yes)
+    :Return success response to user;
+    stop
+else (no)
+    :Return error response to user;
+    stop
+endif
+
+@enduml
