@@ -20,10 +20,10 @@ create-temp:
 	@mkdir -p tmp
 
 init-db-test:
-	sqlite3 ./../database-test.db < ./../init-db-test.sql
+	sqlite3 ./database-test.db < ./init-db-test.sql
 
 drop-db:
-	sqlite3 ./../database-test.db 'DELETE FROM roles; DELETE FROM permissions;'
+	sqlite3 ./database-test.db 'DELETE FROM roles; DELETE FROM permissions;'
 
 coverage-merge:
 	@rm -rf tmp/coverage-report-unit.cov

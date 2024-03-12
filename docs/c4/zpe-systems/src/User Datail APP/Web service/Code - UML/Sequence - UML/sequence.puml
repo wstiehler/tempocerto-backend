@@ -1,0 +1,25 @@
+@startuml
+!theme plain
+
+actor User
+participant "UserDetail-API" as UserDetailAPI
+participant "Role-API" as RoleAPI
+database MySQL
+
+User -> UserDetailAPI: Request to get user details
+UserDetailAPI -> UserDetailAPI: Validate request parameters
+alt Request parameters valid
+    UserDetailAPI -> RoleAPI: Query for role information
+    RoleAPI --> UserDetailAPI: Role information
+    UserDetailAPI -> MySQL: Query user information based on provided parameters
+    alt User information retrieved successfully
+        MySQL --> UserDetailAPI: User information
+        UserDetailAPI --> User: User details
+    else User information retrieval failed
+        MySQL --> UserDetailAPI: Error message (User information retrieval failed)
+        UserDetailAPI --> User: Error message (User information retrieval failed)
+    end
+else Request parameters invalid
+    UserDetailAPI --> User: Error message (Invalid request parameters)
+end
+@enduml

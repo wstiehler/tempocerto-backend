@@ -23,6 +23,11 @@ func NormalizeString(s string) string {
 	return strings.ToLower(s)
 }
 
+var (
+	ErrFailedToCreateCompany = errors.New("failed to create company")
+	ErrFailedToCreateSlot    = errors.New("failed to create slot")
+)
+
 func (s *Service) CreateCompany(db *gorm.DB, company *CompanyEntity) (*CompanyDTO, error) {
 	logger, dispose := logger.New()
 	defer dispose()
@@ -68,7 +73,7 @@ func (s *Service) CreateWeeklyAvailableSlots(db *gorm.DB, startDate time.Time, e
 
 	var parsedWeekdays []time.Weekday
 	for _, wdStr := range weekdays {
-		weekday, err := parseWeekday(wdStr)
+		weekday, err := ParseWeekday(wdStr)
 		if err != nil {
 			logger.Error("Error parsing weekday:", zap.String("error", err.Error()))
 			return nil, err
@@ -91,6 +96,8 @@ func (s *Service) CreateWeeklyAvailableSlots(db *gorm.DB, startDate time.Time, e
 						CreatedAt: time.Now(),
 						UpdatedAt: time.Now(),
 					}
+
+					logger.Debug("Creating slot", zap.Any("slot", newSlot))
 
 					createdSlot, err := s.repo.CreateAvailableSlot(newSlot)
 					if err != nil {
@@ -118,7 +125,7 @@ func (s *Service) CreateWeeklyAvailableSlots(db *gorm.DB, startDate time.Time, e
 	return createdSlots, nil
 }
 
-func parseWeekday(weekdayStr string) (time.Weekday, error) {
+func ParseWeekday(weekdayStr string) (time.Weekday, error) {
 	switch weekdayStr {
 	case "Sunday":
 		return time.Sunday, nil

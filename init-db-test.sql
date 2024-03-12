@@ -1,0 +1,19 @@
+CREATE TABLE IF NOT EXISTS companies (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    cnpj TEXT,
+    name TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS available_slots (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    company_id INT,
+    title TEXT,
+    date DATE,
+    start TIME,
+    end TIME,
+    available TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

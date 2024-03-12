@@ -1,0 +1,34 @@
+@startuml
+!theme blueprint
+
+|Start|
+:Login with user credentials;
+if (Login successful?) then (yes)
+    :Retrieve user role ID;
+    :Query Role-API for role details using role ID;
+    if (Role details retrieved successfully?) then (yes)
+        :Retrieve role permissions;
+        :Query Role-API for permissions using role ID;
+        if (Permissions retrieved successfully?) then (yes)
+            if (User role is Modifier?) then (yes)
+                :Generate token with update and view permissions;
+            elseif (User role is Admin?) then (yes)
+                :Generate token with update, view, and delete permissions;
+            elseif (User role is Watcher?) then (yes)
+                :Generate token with only view permission;
+            endif
+            #green:Finish;
+            stop
+        else (Permissions retrieval failed)
+            :Return error message;
+            stop
+        endif
+    else (Role details retrieval failed)
+        :Return error message;
+        stop
+    endif
+else (Login failed)
+    :Return error message;
+    stop
+endif
+@enduml

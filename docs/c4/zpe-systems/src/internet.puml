@@ -1,0 +1,53 @@
+@startuml
+
+!define ROLE_API_CONTAINER_ROLE role-api-container
+!define USER_CREATE_API_CONTAINER_ROLE user-create-api-container
+!define USER_DETAIL_API_CONTAINER_ROLE user-detail-api-container
+!define USER_MODIFY_REMOVE_API_CONTAINER_ROLE user-modify-remove-api-container
+!define TRAEFIK_CONTAINER_ROLE traefik-container
+!define DATABASE_CONTAINER_ROLE database-container
+
+!define ROLE_API_URL http://role-api.localhost.com
+!define USER_CREATE_API_URL http://user-create-api.localhost.com
+!define USER_DETAIL_API_URL http://user-detail-api.localhost.com
+!define USER_MODIFY_REMOVE_API_URL http://user-modify-remove-api.localhost.com
+!define DATABASE_URL http://database.localhost.com:3306
+
+skinparam monochrome true
+
+package "Docker Containers" {
+    node "role-api" as role_api_container {
+        [Role API]
+    }
+    node "user-create-api" as user_create_api_container {
+        [User Create API]
+    }
+    node "user-detail-api" as user_detail_api_container {
+        [User Detail API]
+    }
+    node "user-modify-remove-api" as user_modify_remove_api_container {
+        [User Modify/Remove API]
+    }
+    node "Traefik" as traefik_container {
+        [Traefik]
+    }
+    node "Database" as database_container {
+    }
+}
+
+role_api_container .. traefik_container
+user_create_api_container .. traefik_container
+user_detail_api_container .. traefik_container
+user_modify_remove_api_container .. traefik_container
+
+traefik_container ..> role_api_container : ROLE_API_URL
+traefik_container ..> user_create_api_container : USER_CREATE_API_URL
+traefik_container ..> user_detail_api_container : USER_DETAIL_API_URL
+traefik_container ..> user_modify_remove_api_container : USER_MODIFY_REMOVE_API_URL
+
+role_api_container .. database_container : DATABASE_URL
+user_create_api_container .. database_container : DATABASE_URL
+user_detail_api_container .. database_container : DATABASE_URL
+user_modify_remove_api_container .. database_container : DATABASE_URL
+
+@enduml

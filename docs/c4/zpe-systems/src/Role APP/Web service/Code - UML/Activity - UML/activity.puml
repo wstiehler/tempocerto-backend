@@ -1,0 +1,27 @@
+@startuml
+!theme blueprint
+
+start
+:[role-api] Receives requests to create, and get roles and permissions;
+:Validates the token;
+:Processes the request;
+
+if (Role already exists?) then (yes)
+    :Aborts operation;
+        label abort
+        :Return message to user with information;
+        #4d3900:Aborts the operation;
+        stop
+else (no)
+    :Creates the role entity;
+    :Saves the entity in the database;
+    if (Saved successfully?) then (yes)
+        #green:Finish;
+        stop
+    else (no)
+        #red:Error: Return message to user;
+        stop
+    endif
+endif
+
+@enduml

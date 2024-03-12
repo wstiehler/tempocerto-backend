@@ -1,0 +1,26 @@
+@startuml
+!theme plain
+
+actor User
+participant RolesAPI as "Roles-API"
+database Database
+
+User -> RolesAPI: Request to create or get roles and permissions
+RolesAPI -> RolesAPI: Process the request
+
+alt Role exists?
+    RolesAPI --> User: Abort operation
+    User --> RolesAPI: Return message to user with information
+    RolesAPI --> User: Aborts the operation
+else Role does not exist
+    RolesAPI -> Database: Create the role entity
+    Database --> RolesAPI: Role entity created successfully
+
+    alt Saved successfully?
+        RolesAPI --> User: Finish
+    else Failed to save
+        RolesAPI --> User: Error: Return message to user
+    end
+end
+
+@enduml
