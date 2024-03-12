@@ -1,0 +1,37 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Connect to server",
+            "type": "go",
+            "request": "attach",
+            "mode": "remote",
+            "remotePath": "${workspaceFolder}",
+            "port": 8080,
+            "host": "localhost"
+        },
+        {
+            "name":"localhost-tempocerto-api",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "cmd/tempocerto-app/main.go",
+            "env": {
+                "APPLICATION_PORT":":8080",
+                "APPLICATION_ADDRESS":"localhost",
+                "MYSQL_HOST":"localhost",
+                "MYSQL_USER":"root",
+                "MYSQL_PASSWORD":"12345",
+                "MYSQL_DB_NAME":"tempocerto_systems",
+                "MYSQL_PORT":"3306",
+                "SECRET": "000000",
+            },
+            "showLog": true,
+            "cwd": "./"
+        },
+       
+    ]
+}
