@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  user-create-api:
+    platform: linux/x86_64
+    build: ./user-create-api/.
+    container_name: user-create-api
+    environment:
+      - ENVIRONMENT=development
+      - APP_VERSION=Local
+      - LOG_LEVEL=DEBUG
+      - APPLICATION_PORT=:8081
+      - APPLICATION_ADDRESS=localhost
+      - CORS_URL=http://localhost:8081
+      - MYSQL_DBNAME=tempocerto_api
+      - MYSQL_HOST=tempocerto-mysql
+      - MYSQL_PORT=3306
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=12345
+      - SECRET=000000
+      - INTERVAL_GET_KEYS_TO_CREATE=10
+      - NATS_URL=http://nats:4222
+      - CREATE_USER_QUEUE_SUBJECT=user.create
+      - APPLICATION_URL_ROLE_API=http://role-api:8080
+    depends_on:
+      - tempocerto-db
+      - nats
+    ports:
+      - "8081:8081"
+    networks:
+      - tempocerto-bridge
+
+networks:
+  tempocerto-bridge:
+    driver: bridge
