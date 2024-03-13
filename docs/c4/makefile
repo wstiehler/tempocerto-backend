@@ -9,7 +9,7 @@ new-project:
 	c4builder
 
 config:
-	cd zpe-systems && npm run config
+	cd tempocerto-systems && npm run config
 
 watch-standalone:
-	cd zpe-systems && c4builder site --watch
+	cd tempocerto-systems && c4builder site --watch
