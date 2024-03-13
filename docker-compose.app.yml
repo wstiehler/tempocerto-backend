@@ -21,7 +21,6 @@ services:
       - INTERVAL_GET_KEYS_TO_CREATE=10
     depends_on:
       - tempocerto-db
-      - nats
     ports:
       - "8080:8080"
     networks:

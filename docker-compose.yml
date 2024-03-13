@@ -38,14 +38,6 @@ services:
     networks:
       - tempocerto-bridge
 
-  nats:
-    container_name: nats
-    image: nats:latest
-    ports:
-      - "4222:4222"
-    networks:
-      - tempocerto-bridge
-
 networks:
   tempocerto-bridge:
     driver: bridge

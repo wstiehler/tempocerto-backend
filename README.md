@@ -3,7 +3,7 @@
 <p align="center"><img src="https://user-images.githubusercontent.com/1092882/86512217-bfd5a480-be1d-11ea-976c-a7c0ac0cd1f1.png" alt="goapp gopher" width="256px"/></p>
 
 # tempocerto-backend
-This project aims to create a microservices ecosystem for managing user CRUD operations, accommodating various roles.
+This project aims to create a microservices ecosystem for managing user CRUD operations, accommodating various schedules.
 
 ## Execution Guide
 
