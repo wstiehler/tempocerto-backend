@@ -1,6 +1,6 @@
 | Branch                                                                                                                                           Code coverage |
 | ------ | :------------------------------------------------------------------------------------------------------------------------------------------------------: | -------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| main | [![coverage report](https://github.com/wstiehler/tempocerto-backend/blob/main/covarage.txt)](https://github.com/wstiehler/tempocerto-backend/blob/main/covarage.txt) |
+| main | [![coverage report](https://github.com/wstiehler/tempocerto-backend/blob/main/covarage.svg)](https://github.com/wstiehler/tempocerto-backend/blob/main/covarage.svg) |
 
 
 <p align="center"><img src="https://user-images.githubusercontent.com/1092882/86512217-bfd5a480-be1d-11ea-976c-a7c0ac0cd1f1.png" alt="goapp gopher" width="256px"/></p>
