@@ -6,6 +6,7 @@ import (
 
 	uuid "github.com/google/uuid"
 	"github.com/wstiehler/tempocerto-backend/internal/api"
+	"github.com/wstiehler/tempocerto-backend/internal/cron"
 	"github.com/wstiehler/tempocerto-backend/internal/domain/tempocerto"
 	"github.com/wstiehler/tempocerto-backend/internal/environment"
 	config "github.com/wstiehler/tempocerto-backend/internal/infrastructure/database"
@@ -57,15 +58,24 @@ func main() {
 	service := tempocerto.NewService(repository)
 
 	setupApi(logger, *service, *mySqlConfig)
+	setupCron(logger, *service, *mySqlConfig)
 
 	config.CloseConnection(mySqlConfig)
 
 }
 
-func setupApi(logger logwrapper.LoggerWrapper, roleService tempocerto.Service, db gorm.DB) {
+func setupApi(logger logwrapper.LoggerWrapper, service tempocerto.Service, db gorm.DB) {
 	input := api.Input{
 		Logger: logger,
 	}
 
-	api.Start(input, roleService, &db)
+	api.Start(input, service, &db)
+}
+
+func setupCron(logger logwrapper.LoggerWrapper, service tempocerto.Service, db gorm.DB) {
+	input := cron.Input{
+		Logger: logger,
+	}
+	// This logic is still being created
+	cron.Cron(input, &db, service)
 }

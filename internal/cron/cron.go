@@ -7,29 +7,34 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/wstiehler/tempocerto-backend/internal/domain/tempocerto"
+	"github.com/wstiehler/tempocerto-backend/internal/infrastructure/logger/logwrapper"
 )
 
-func Cron(db *gorm.DB, service tempocerto.Service, companyID uint) {
+type Input struct {
+	Logger logwrapper.LoggerWrapper
+}
+
+func Cron(input Input, db *gorm.DB, service tempocerto.Service) {
+
+	logger := input.Logger
 
 	c := cron.New()
 
+	logger.Info("Starting TempoCerto-CronJob")
+
 	_, err := c.AddFunc("0 0 * * 0", func() {
 		// startDate := time.Now()
-		// endDate := startDate.AddDate(0, 0, 7)
-		// startTime := "08:00"
-		// endTime := "18:00"
-		// weekdays := []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday}
 
-		// _, err := service.CreateWeeklyAvailableSlots(db, companyID, startDate, endDate, startTime, endTime, weekdays)
+		// _, err := service.CreateDailyAvailableSlots(db, startDate)
 		// if err != nil {
-		// 	fmt.Println("Erro ao criar slots semanais:", err)
+		// 	fmt.Println("Error on create slots:", err)
 		// } else {
-		// 	fmt.Println("Slots semanais criados com sucesso!")
+		// 	fmt.Println("Slots create with success!")
 		// }
 	})
 
 	if err != nil {
-		fmt.Println("Erro ao agendar o cronjob:", err)
+		fmt.Println("Error on schedule the cron:", err)
 		return
 	}
 
