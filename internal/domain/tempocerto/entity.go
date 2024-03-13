@@ -27,6 +27,17 @@ type AvailableSlot struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+type WeeklySlotEntity struct {
+	ID        uint      `gorm:"primary_key"`
+	StartDate time.Time `json:"start_date"`
+	EndDate   time.Time `json:"end_date"`
+	StartTime string    `json:"start_time"`
+	EndTime   string    `json:"end_time"`
+	Weekdays  []string  `json:"weekdays"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
 func (r *CompanyEntity) TableName() string {
 	return "companies"
 }

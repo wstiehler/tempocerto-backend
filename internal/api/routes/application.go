@@ -18,7 +18,7 @@ func MakeRoleHandlers(r *gin.Engine, service tempocerto.Service, db *gorm.DB) {
 		group.GET("/schedules:availables", GetAllAvailableSlots(service, db))
 
 		group.PATCH("/schedule", UpdateAvailableSlot(service, db))
-		group.POST("/weekly-slots", CreateWeeklyAvailableSlots(service, db))
+		group.POST("/daily-slots", CreateDailyAvailableSlots(service, db))
 		group.GET("/schedules", GetAllSchedules(service, db))
 	}
 }
@@ -74,14 +74,10 @@ func UpdateAvailableSlot(service tempocerto.Service, db *gorm.DB) gin.HandlerFun
 	}
 }
 
-func CreateWeeklyAvailableSlots(service tempocerto.Service, db *gorm.DB) gin.HandlerFunc {
+func CreateDailyAvailableSlots(service tempocerto.Service, db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req struct {
-			StartDate string   `json:"start_date"`
-			EndDate   string   `json:"end_date"`
-			StartTime string   `json:"start_time"`
-			EndTime   string   `json:"end_time"`
-			Weekdays  []string `json:"weekdays"`
+			StartDate string `json:"start_date"`
 		}
 
 		if err := c.BindJSON(&req); err != nil {
@@ -95,15 +91,9 @@ func CreateWeeklyAvailableSlots(service tempocerto.Service, db *gorm.DB) gin.Han
 			return
 		}
 
-		endDate, err := time.Parse("2006-01-02", req.EndDate)
+		createdSlots, err := service.CreateDailyAvailableSlots(db, startDate)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid end date format"})
-			return
-		}
-
-		createdSlots, err := service.CreateWeeklyAvailableSlots(db, startDate, endDate, req.StartTime, req.EndTime, req.Weekdays)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create weekly available slots"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create daily available slots"})
 			return
 		}
 

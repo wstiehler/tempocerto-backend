@@ -1,3 +1,6 @@
+//go:build unit
+// +build unit
+
 package tempocerto_test
 
 import (
@@ -36,8 +39,7 @@ func TestCreateCompany_Success(t *testing.T) {
 	assert.Equal(t, company.Name, createdCompany.Name)
 	assert.Equal(t, company.CNPJ, createdCompany.CNPJ)
 }
-
-func TestCreateWeeklyAvailableSlots_Success(t *testing.T) {
+func TestCreateDailyAvailableSlots_Success(t *testing.T) {
 	db, err := config.ConnectMemoryDb()
 	assert.NoError(t, err)
 
@@ -47,79 +49,28 @@ func TestCreateWeeklyAvailableSlots_Success(t *testing.T) {
 	}()
 
 	adapter := &tempocerto.MemorySqlAdapter{}
-
 	service := tempocerto.NewService(tempocerto.NewRepository(db, adapter))
 
-	startDate := time.Now()
-	endDate := startDate.AddDate(0, 0, 7) // One week from now
+	date := time.Date(2024, time.March, 13, 0, 0, 0, 0, time.UTC)
 
-	start := "08:00"
-	end := "12:00"
-	weekdays := []string{"Monday", "Wednesday", "Friday"} // Specify the weekdays
-
-	createdSlots, err := service.CreateWeeklyAvailableSlots(db, startDate, endDate, start, end, weekdays)
+	createdSlots, err := service.CreateDailyAvailableSlots(db, date)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, createdSlots)
-}
 
-func TestCreateWeeklyAvailableSlots_Error(t *testing.T) {
-	db, err := config.ConnectMemoryDb()
-	assert.NoError(t, err)
+	expectedSlots := 10 // (18:00 - 08:00) / 1 hour interval
+	assert.Equal(t, expectedSlots, len(createdSlots))
 
-	defer func() {
-		err := config.CloseMemoryDb(db)
-		assert.NoError(t, err)
-	}()
+	workStartTime, _ := time.Parse("15:04", "08:00")
+	for i, slot := range createdSlots {
+		expectedStartTime := workStartTime.Add(time.Hour * time.Duration(i))
+		expectedEndTime := expectedStartTime.Add(time.Hour)
 
-	adapter := &tempocerto.MemorySqlAdapter{}
-
-	service := tempocerto.NewService(tempocerto.NewRepository(db, adapter))
-
-	// Define os parâmetros para criar os slots
-	startDate := time.Now()
-	endDate := startDate.AddDate(0, 0, 7)
-	start := "07:00" // Horário fora do horário de trabalho
-	end := "09:00"
-	weekdays := []string{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"}
-
-	// Tenta criar os slots
-	_, err = service.CreateWeeklyAvailableSlots(db, startDate, endDate, start, end, weekdays)
-
-	// Verifica se ocorreu um erro e se é o erro esperado
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "slot time is outside of work hours (8:00 - 18:00)")
-}
-
-func TestParseWeekday_Success(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected time.Weekday
-	}{
-		{"Sunday", time.Sunday},
-		{"Monday", time.Monday},
-		{"Tuesday", time.Tuesday},
-		{"Wednesday", time.Wednesday},
-		{"Thursday", time.Thursday},
-		{"Friday", time.Friday},
-		{"Saturday", time.Saturday},
+		assert.Equal(t, date, slot.Date)
+		assert.Equal(t, expectedStartTime.Format("15:04"), slot.Start)
+		assert.Equal(t, expectedEndTime.Format("15:04"), slot.End)
+		assert.Equal(t, "true", slot.Available)
 	}
-
-	for _, test := range tests {
-		t.Run(fmt.Sprintf("ParseWeekday_%s", test.input), func(t *testing.T) {
-			weekday, err := tempocerto.ParseWeekday(test.input)
-			assert.NoError(t, err)
-			assert.Equal(t, test.expected, weekday)
-		})
-	}
-}
-
-func TestParseWeekday_Error(t *testing.T) {
-
-	invalidWeekday := "InvalidDay"
-	weekday, err := tempocerto.ParseWeekday(invalidWeekday)
-	fmt.Println(weekday)
-	assert.Error(t, err)
 }
 
 func TestGetCompanyInfoByID_Success(t *testing.T) {
@@ -147,6 +98,7 @@ func TestGetCompanyInfoByID_Success(t *testing.T) {
 	fmt.Println(companyDTO)
 	assert.NoError(t, err)
 }
+
 func TestGetAllAvailableSlots_Success(t *testing.T) {
 	db, err := config.ConnectMemoryDb()
 	assert.NoError(t, err)
@@ -160,19 +112,20 @@ func TestGetAllAvailableSlots_Success(t *testing.T) {
 	repo := tempocerto.NewRepository(db, adapter)
 	service := tempocerto.NewService(repo)
 
-	// Criar alguns slots disponíveis usando CreateWeeklyAvailableSlots
-	startDate := time.Now()
-	endDate := startDate.AddDate(0, 0, 7)                 // Uma semana a partir de hoje
-	weekdays := []string{"Monday", "Wednesday", "Friday"} // Slots disponíveis nas segundas, quartas e sextas
-	_, err = service.CreateWeeklyAvailableSlots(db, startDate, endDate, "08:00", "09:00", weekdays)
+	date := time.Date(2024, time.March, 12, 0, 10, 0, 0, time.UTC)
+
+	_, err = service.CreateDailyAvailableSlots(db, date)
 	assert.NoError(t, err)
 
-	// Chamar o método GetAllAvailableSlots
 	allSlots, err := service.GetAllAvailableSlots(db)
 	assert.NoError(t, err)
 
-	// Verificar se todos os slots disponíveis foram retornados
-	assert.NotEmpty(t, allSlots)
+	expectedSlots := 20
+	assert.Equal(t, expectedSlots, len(allSlots))
+
+	for _, slot := range allSlots {
+		assert.Equal(t, "true", slot.Available)
+	}
 }
 
 func clearDatabase(db *gorm.DB) {
@@ -194,11 +147,9 @@ func TestGetAllAvailableSlots_Empty(t *testing.T) {
 	repo := tempocerto.NewRepository(db, adapter)
 	service := tempocerto.NewService(repo)
 
-	// Chamar o método GetAllAvailableSlots quando não há slots disponíveis
 	allSlots, err := service.GetAllAvailableSlots(db)
 	assert.NoError(t, err)
 
-	// Verificar se a lista de slots retornada está vazia
 	assert.Empty(t, allSlots)
 }
 
@@ -217,13 +168,8 @@ func TestGetAllSchedules_Success(t *testing.T) {
 
 	clearDatabase(db)
 
-	startDate := time.Now()
-	endDate := startDate.AddDate(0, 0, 7)
-	start := "08:00"
-	end := "09:00"
-	weekdays := []string{"Monday", "Wednesday", "Friday"}
-
-	_, err = service.CreateWeeklyAvailableSlots(db, startDate, endDate, start, end, weekdays)
+	date := time.Date(2024, time.March, 13, 0, 0, 0, 0, time.UTC)
+	_, err = service.CreateDailyAvailableSlots(db, date)
 	assert.NoError(t, err)
 
 	retrievedSchedules, err := service.GetAllSchedules(db)
@@ -231,39 +177,6 @@ func TestGetAllSchedules_Success(t *testing.T) {
 
 	assert.Empty(t, retrievedSchedules)
 }
-
-// func TestFillSlotByDateTime_Success(t *testing.T) {
-// 	db, err := config.ConnectMemoryDb()
-// 	assert.NoError(t, err)
-
-// 	defer func() {
-// 		err := config.CloseMemoryDb(db)
-// 		assert.NoError(t, err)
-// 	}()
-
-// 	adapter := &tempocerto.MemorySqlAdapter{}
-// 	repo := tempocerto.NewRepository(db, adapter)
-// 	service := tempocerto.NewService(repo)
-
-// 	clearDatabase(db)
-
-// 	startDate := time.Now().Truncate(24 * time.Hour)
-// 	endDate := startDate.AddDate(0, 0, 7)
-// 	start := "08:00"
-// 	end := "09:00"
-// 	companyId := uint(1)
-// 	title := "Carregamento no Fort"
-// 	weekdays := []string{"Monday", "Wednesday", "Friday"}
-
-// 	_, err = service.CreateWeeklyAvailableSlots(db, startDate, endDate, start, end, weekdays)
-// 	assert.NoError(t, err)
-
-// 	slotDateTime := startDate.Add(time.Hour * 12)
-
-// 	_, err = service.FillSlotByDateTime(db, slotDateTime, start, end, title, companyId)
-// 	assert.NoError(t, err)
-
-// }
 
 func TestFillSlotByDateTime_Failure(t *testing.T) {
 	db, err := config.ConnectMemoryDb()
@@ -280,19 +193,52 @@ func TestFillSlotByDateTime_Failure(t *testing.T) {
 
 	clearDatabase(db)
 
-	startDate := time.Now().Truncate(24 * time.Hour)
-	endDate := startDate.AddDate(0, 0, 7)
-	start := "08:00"
-	end := "09:00"
-	companyId := uint(1)
-	title := "Carregamento no Fort"
-	weekdays := []string{"Monday", "Wednesday", "Friday"}
-
-	_, err = service.CreateWeeklyAvailableSlots(db, startDate, endDate, start, end, weekdays)
+	date := time.Date(2024, time.March, 13, 0, 0, 0, 0, time.UTC)
+	_, err = service.CreateDailyAvailableSlots(db, date)
 	assert.NoError(t, err)
 
-	slotDateTime := startDate.Add(time.Hour * 12)
+	companyId := uint(1)
+	title := "Carregamento no Fort"
 
-	_, err = service.FillSlotByDateTime(db, slotDateTime, start, end, title, companyId)
+	slotDateTime := date.Add(time.Hour * 12)
+
+	_, err = service.FillSlotByDateTime(db, slotDateTime, "08:00", "09:00", title, companyId)
+	assert.Error(t, err)
+}
+
+func TestFillSlotByDateTime_Success(t *testing.T) {
+	db, err := config.ConnectMemoryDb()
+	assert.NoError(t, err)
+
+	defer func() {
+		err := config.CloseMemoryDb(db)
+		assert.NoError(t, err)
+	}()
+
+	adapter := &tempocerto.MemorySqlAdapter{}
+	repo := tempocerto.NewRepository(db, adapter)
+	service := tempocerto.NewService(repo)
+
+	date := time.Date(2024, time.March, 13, 0, 0, 0, 0, time.UTC)
+
+	slotDTO, err := service.FillSlotByDateTime(db, date, "08:00", "09:00", "Test Title", 1)
+	assert.NoError(t, err)
+	assert.NotNil(t, slotDTO)
+}
+
+func TestFillSlotByDateTime_ErrorGetAvailableSlot(t *testing.T) {
+	db, err := config.ConnectMemoryDb()
+	assert.NoError(t, err)
+
+	defer func() {
+		err := config.CloseMemoryDb(db)
+		assert.NoError(t, err)
+	}()
+
+	adapter := &tempocerto.MemorySqlAdapter{}
+	repo := tempocerto.NewRepository(db, adapter)
+	service := tempocerto.NewService(repo)
+
+	_, err = service.FillSlotByDateTime(db, time.Now(), "08:00", "09:00", "Test Title", 1)
 	assert.Error(t, err)
 }

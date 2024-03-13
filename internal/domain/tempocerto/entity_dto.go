@@ -21,6 +21,7 @@ type DTOResponse struct {
 	Title     string     `json:"title"`
 	Start     string     `json:"start"`
 	End       string     `json:"end"`
+	Date      time.Time  `json:"date"`
 	Available string     `json:"available"`
 	Company   CompanyDTO `json:"company"`
 }
