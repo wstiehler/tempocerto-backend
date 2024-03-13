@@ -1,10 +1,16 @@
 package cmd
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 
 	"github.com/dghubble/sling"
+	"github.com/wstiehler/tempocerto-backend/internal/domain/tempocerto"
 	"github.com/wstiehler/tempocerto-backend/internal/infrastructure/logger"
+	"go.uber.org/zap"
 )
 
 type ErrorInfo struct {
@@ -49,74 +55,71 @@ func (project ProjectApi) ApiHealth() (*HealthReturn, error) {
 	return response, nil
 }
 
-// func (project ProjectApi) CreateRole(r tempocerto.RoleEntity) (*tempocerto.RoleDTO, error) {
-// 	logger, dispose := logger.New()
-// 	defer dispose()
+func (project ProjectApi) CreateCompany(r tempocerto.CompanyEntity) (*tempocerto.CompanyDTO, error) {
+	logger, dispose := logger.New()
+	defer dispose()
 
-// 	response := new(tempocerto.RoleDTO)
+	response := new(tempocerto.CompanyDTO)
 
-// 	resp, err := sling.New().Base(project.url).Post("/v1/role").BodyJSON(r).ReceiveSuccess(response)
-// 	if err != nil {
-// 		logger.Error("Create error")
-// 		fmt.Println(response, resp, err)
-// 		return nil, err
-// 	}
-// 	return response, nil
-// }
+	resp, err := sling.New().Base(project.url).Post("/v1/company").BodyJSON(r).ReceiveSuccess(response)
+	if err != nil {
+		logger.Error("Create error")
+		fmt.Println(response, resp, err)
+		return nil, err
+	}
+	return response, nil
+}
 
-// func (project ProjectApi) GetRoleByID(id uint) (*tempocerto.RoleDTO, error) {
-// 	logger, dispose := logger.New()
-// 	defer dispose()
+func (project ProjectApi) CreateWeeklySlots(r tempocerto.WeeklySlotEntity) (*tempocerto.WeeklySlotEntity, error) {
+	logger, dispose := logger.New()
+	defer dispose()
 
-// 	response := new(tempocerto.RoleDTO)
+	// Codifica o corpo da solicitação como JSON
+	requestBody, err := json.Marshal(r)
+	if err != nil {
+		logger.Error("Error encoding request body:", zap.String("error", err.Error()))
+		return nil, err
+	}
 
-// 	idString := strconv.Itoa(int(id))
+	// Cria a solicitação HTTP POST
+	req, err := http.NewRequest("POST", project.url+"/v1/weekly-slots", bytes.NewBuffer(requestBody))
+	if err != nil {
+		logger.Error("Error creating POST request:", zap.String("error", err.Error()))
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json") // Define o cabeçalho Content-Type como application/json
 
-// 	req, err := http.NewRequest("GET", project.url+"/v1/role/"+idString, nil)
+	// Cria um cliente HTTP
+	client := &http.Client{}
 
-// 	if err != nil {
-// 		logger.Error("Failed to create request", zap.Error(err))
-// 		return nil, err
-// 	}
+	// Envia a solicitação e obtém a resposta
+	resp, err := client.Do(req)
+	if err != nil {
+		logger.Error("Error sending POST request:", zap.String("error", err.Error()))
+		return nil, err
+	}
+	defer resp.Body.Close()
 
-// 	httpClient := &http.Client{}
-// 	resp, _ := httpClient.Do(req)
+	// Lê o corpo da resposta
+	responseBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		logger.Error("Error reading response body:", zap.String("error", err.Error()))
+		return nil, err
+	}
 
-// 	err = newcheckHasError(resp)
+	// Verifica se a resposta foi bem-sucedida (código de status 2xx)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		logger.Error("Received non-successful response:", zap.String("error", resp.Status))
+		return nil, fmt.Errorf("non-successful response: %d", resp.StatusCode)
+	}
 
-// 	if err != nil {
-// 		logger.Error("Error on get role by id", zap.String("error", err.Error()))
-// 	}
+	// Decodifica o corpo da resposta JSON para uma instância de WeeklySlotEntity
+	var response tempocerto.WeeklySlotEntity
+	if err := json.Unmarshal(responseBody, &response); err != nil {
+		logger.Error("Error decoding response body:", zap.String("error", err.Error()))
+		return nil, err
+	}
 
-// 	defer resp.Body.Close()
-
-// 	responseBody, err := io.ReadAll(resp.Body)
-// 	if err != nil {
-// 		logger.Error("Failed to read response body", zap.Error(err))
-// 		return nil, err
-// 	}
-
-// 	if err := json.Unmarshal(responseBody, response); err != nil {
-// 		logger.Error("Failed to decode response body", zap.Error(err))
-// 		return nil, err
-// 	}
-
-// 	return response, nil
-// }
-
-// func newcheckHasError(resp *http.Response) error {
-// 	logger, dispose := logger.New()
-// 	defer dispose()
-
-// 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-// 		logger.Error("Unexpected response status", zap.Int("status", resp.StatusCode))
-// 		return fmt.Errorf("unexpected response status: %d", resp.StatusCode)
-// 	}
-
-// 	if resp.StatusCode >= 500 {
-// 		logger.Error("Unexpected response status", zap.Int("status", resp.StatusCode))
-// 		return fmt.Errorf("unexpected response status: %d", resp.StatusCode)
-// 	}
-
-// 	return nil
-// }
+	// Retorna a entidade semanal criada
+	return &response, nil
+}

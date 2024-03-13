@@ -3,83 +3,80 @@
 
 package main
 
-// import (
-// 	"fmt"
-// 	"os"
-// 	"strconv"
-// 	"testing"
+import (
+	"fmt"
+	"os"
+	"strconv"
+	"testing"
+	"time"
 
-// 	"github.com/stretchr/testify/assert"
-// 	"github.com/wstiehler/tempocerto-backend/e2e/cmd"
-// 	"github.com/wstiehler/tempocerto-backend/internal/domain/role"
-// )
+	"github.com/stretchr/testify/assert"
+	"github.com/wstiehler/tempocerto-backend/e2e/cmd"
+	"github.com/wstiehler/tempocerto-backend/internal/domain/tempocerto"
+)
 
-// var url string
-// var timeout int
+var url string
 
-// func readEnv() (string, int) {
-// 	url = os.Getenv("APPLICATION_URL")
-// 	timeoutString := os.Getenv("TEST_TIMEOUT")
+func readEnv() (string, int) {
+	url = os.Getenv("APPLICATION_URL")
+	timeoutString := os.Getenv("TEST_TIMEOUT")
 
-// 	timeout, err := strconv.Atoi(timeoutString)
-// 	if err != nil {
-// 		timeout = 3
-// 	}
-// 	return url, timeout
-// }
+	timeout, err := strconv.Atoi(timeoutString)
+	if err != nil {
+		timeout = 3
+	}
+	return url, timeout
+}
 
-// func TestApiHealth(t *testing.T) {
-// 	assert := assert.New(t)
-// 	readEnv()
+func TestApiHealth(t *testing.T) {
+	assert := assert.New(t)
+	readEnv()
 
-// 	t.Run("Health status", func(t *testing.T) {
-// 		client := cmd.NewProjectApi(url)
-// 		health, err := client.ApiHealth()
+	t.Run("Health status", func(t *testing.T) {
+		client := cmd.NewProjectApi(url)
+		health, err := client.ApiHealth()
 
-// 		fmt.Printf("health: %+v\n", health)
-// 		assert.Equal(err, nil)
-// 	})
-// }
+		fmt.Printf("health: %+v\n", health)
+		assert.Equal(err, nil)
+	})
+}
 
-// func TestMethodCompany(t *testing.T) {
-// 	assert := assert.New(t)
-// 	readEnv()
+var companyId uint
 
-// 	roleCreated := role.RoleEntity{
-// 		Role: "aadmin",
-// 		Permissions: []role.PermissionEntity{
-// 			{
-// 				Name: "modifier",
-// 			},
-// 			{
-// 				Name: "watcher",
-// 			},
-// 			{
-// 				Name: "deleter",
-// 			},
-// 		},
-// 	}
+func TestMethodC(t *testing.T) {
+	assert := assert.New(t)
+	readEnv()
 
-// 	var roleId uint
+	companyEntity := tempocerto.CompanyEntity{
+		CNPJ: "77.866.284/0001-28",
+		Name: "teste-tempo certo",
+	}
 
-// 	t.Run("CreateRole_When_return_must_be_success", func(t *testing.T) {
-// 		client := cmd.NewProjectApi(url)
-// 		role, err := client.CreateRole(roleCreated)
+	startDate, _ := time.Parse("2006-01-02", "2024-03-12")
+	endDate, _ := time.Parse("2006-01-02", "2024-03-12")
 
-// 		roleId = role.Id
+	weeklyEntity := tempocerto.WeeklySlotEntity{
+		StartDate: startDate,
+		EndDate:   endDate,
+		StartTime: "08:00",
+		EndTime:   "18:00",
+		Weekdays:  []string{"Monday", "Tuesday"},
+	}
 
-// 		assert.Equal(role.Role, "aadmin")
-// 		assert.Equal(err, nil)
-// 	})
+	t.Run("CreateCompany_When_return_must_be_success", func(t *testing.T) {
+		client := cmd.NewProjectApi(url)
+		company, err := client.CreateCompany(companyEntity)
 
-// 	t.Run("GetRoleByID_When_return_must_be_one", func(t *testing.T) {
-// 		client := cmd.NewProjectApi(url)
+		companyId = company.ID
 
-// 		role, err := client.GetRoleByID(roleId)
+		assert.Equal(company.Name, "teste-tempo certo")
+		assert.Equal(err, nil)
+	})
 
-// 		assert.Equal(role.Role, "aadmin")
-// 		assert.Equal(err, nil)
+	t.Run("CreateWeeklySlots_When_return_must_be_success", func(t *testing.T) {
+		client := cmd.NewProjectApi(url)
+		_, err := client.CreateWeeklySlots(weeklyEntity)
 
-// 	})
-
-// }
+		assert.Equal(err, nil)
+	})
+}
