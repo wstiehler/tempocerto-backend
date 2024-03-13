@@ -1,0 +1,186 @@
+{
+	"info": {
+		"_postman_id": "cd41614f-e8a2-4f26-9d21-5b359e3d02c7",
+		"name": "Tempo Certo Systems",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "31816718",
+		"_collection_link": "https://galactic-astronaut-371826.postman.co/workspace/Evoluinfo~6074e7b7-dd1c-426f-a46d-b96d82ec31ee/collection/31816718-cd41614f-e8a2-4f26-9d21-5b359e3d02c7?action=share&source=collection_link&creator=31816718"
+	},
+	"item": [
+		{
+			"name": "API",
+			"item": [
+				{
+					"name": "CreateCompany",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"cnpj\": \"77.866.284/0001-28\",\n    \"name\": \"tempo certo\"\n\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/v1/company",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"v1",
+								"company"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CreateDailySlots",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"start_date\": \"2024-03-13\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/v1/daily-slots",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"v1",
+								"daily-slots"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateSlot",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"company_id\": 1,\n    \"title\": \"Descarga Fort\",\n    \"date\": \"2024-03-13\",\n    \"start\": \"12:00\",\n    \"end\": \"13:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/v1/schedule",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"v1",
+								"schedule"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetSlots",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/v1/schedules:availables",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"v1",
+								"schedules:availables"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetSchedules",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/v1/schedules",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"v1",
+								"schedules"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "HealthAPI",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/health",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"health"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
