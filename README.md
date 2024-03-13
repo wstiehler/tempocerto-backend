@@ -1,4 +1,4 @@
-[![coverage report](https://img.shields.io/badge/coverage-{{COVERAGE_VALUE}}-brightgreen)](https://github.com/wstiehler/tempocerto-backend/blob/main/covarage.txt)
+[![coverage report](https://img.shields.io/badge/coverage-63.4-brightgreen)](https://github.com/wstiehler/tempocerto-backend/blob/main/covarage.txt)
 
 <p align="center"><img src="https://user-images.githubusercontent.com/1092882/86512217-bfd5a480-be1d-11ea-976c-a7c0ac0cd1f1.png" alt="goapp gopher" width="256px"/></p>
 
